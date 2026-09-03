@@ -1,0 +1,27 @@
+# --- Java / Maven (backend) ---
+backend/target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# --- Python (ai-service) ---
+ai-service/venv/
+ai-service/__pycache__/
+**/__pycache__/
+*.pyc
+
+# --- Node / Vite (frontend) ---
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+
+# --- Editor / OS noise ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Env files (never commit secrets) ---
+.env
+.env.local
+*.env
