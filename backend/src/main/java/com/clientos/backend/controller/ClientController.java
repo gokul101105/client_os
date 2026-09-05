@@ -5,6 +5,7 @@ import com.clientos.backend.dto.ClientResponse;
 import com.clientos.backend.service.ClientService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,29 +29,34 @@ public class ClientController {
     }
 
     @GetMapping
-    public List<ClientResponse> getAll() {
-        return clientService.findAll().stream().map(ClientResponse::from).toList();
+    public List<ClientResponse> getAll(Authentication authentication) {
+        return clientService.findAllForCurrentUser(authentication.getName())
+                .stream().map(ClientResponse::from).toList();
     }
 
     @GetMapping("/{id}")
-    public ClientResponse getById(@PathVariable Long id) {
-        return ClientResponse.from(clientService.findById(id));
+    public ClientResponse getById(@PathVariable Long id, Authentication authentication) {
+        return ClientResponse.from(clientService.findByIdForCurrentUser(id, authentication.getName()));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ClientResponse create(@Valid @RequestBody ClientRequest request) {
-        return ClientResponse.from(clientService.create(request));
+    public ClientResponse create(@Valid @RequestBody ClientRequest request, Authentication authentication) {
+        return ClientResponse.from(clientService.create(request, authentication.getName()));
     }
 
     @PutMapping("/{id}")
-    public ClientResponse update(@PathVariable Long id, @Valid @RequestBody ClientRequest request) {
-        return ClientResponse.from(clientService.update(id, request));
+    public ClientResponse update(
+            @PathVariable Long id,
+            @Valid @RequestBody ClientRequest request,
+            Authentication authentication
+    ) {
+        return ClientResponse.from(clientService.update(id, request, authentication.getName()));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        clientService.delete(id);
+    public void delete(@PathVariable Long id, Authentication authentication) {
+        clientService.delete(id, authentication.getName());
     }
 }

@@ -7,16 +7,24 @@ import java.time.LocalDateTime;
 public record ClientResponse(
         Long id,
         String name,
-        Long ownerId,
+        String industry,
+        String plan,
+        String accountManagerName,
         Integer healthScore,
+        Integer openIssuesCount,
+        LocalDateTime lastActivityDate,
         LocalDateTime createdAt
 ) {
     public static ClientResponse from(Client client) {
         return new ClientResponse(
                 client.getId(),
                 client.getName(),
-                client.getOwnerId(),
+                client.getIndustry(),
+                client.getPlan(),
+                client.getOwner().getName(),
                 client.getHealthScore(),
+                client.getOpenIssuesCount(),
+                client.getLastActivityDate(),
                 client.getCreatedAt()
         );
     }
