@@ -4,6 +4,9 @@ backend/target/
 *.jar
 !.mvn/wrapper/maven-wrapper.jar
 
+# --- Uploaded documents (Module 7 local disk storage) ---
+backend/storage/
+
 # --- Python (ai-service) ---
 ai-service/venv/
 ai-service/__pycache__/
