@@ -22,6 +22,10 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     conversation_id: Optional[str] = None
+    # document_chunks row ids the answer was actually grounded in — empty
+    # when no relevant context was found. Lets a caller show "sources" or
+    # debug why an answer looks off, without exposing the raw vectors.
+    source_chunk_ids: List[int] = []
 
 
 class SummarizeRequest(BaseModel):

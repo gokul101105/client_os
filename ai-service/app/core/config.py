@@ -32,5 +32,19 @@ class Settings:
     # app/embeddings/generator.py and database/migrations/V3__document_embeddings.sql.
     embedding_model_name: str = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
 
+    # Claude (Module 11 RAG). Empty by default — app/llm/claude_client.py
+    # raises a clear error at call time rather than at import time, so the
+    # service still starts fine without a key configured yet.
+    anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")
+    claude_model: str = os.getenv("CLAUDE_MODEL", "claude-sonnet-5")
+    claude_max_tokens: int = int(os.getenv("CLAUDE_MAX_TOKENS", "500"))
+
+    # Retrieval tuning (Module 11). rag_max_distance is a starting
+    # heuristic, not a derived constant — cosine-distance cutoffs for
+    # "is this actually relevant" are dataset-dependent and should be
+    # tuned against real usage, not trusted blindly.
+    rag_top_k: int = int(os.getenv("RAG_TOP_K", "5"))
+    rag_max_distance: float = float(os.getenv("RAG_MAX_DISTANCE", "0.6"))
+
 
 settings = Settings()

@@ -1,8 +1,7 @@
-"""Retrieval-augmented generation: query -> relevant chunks -> context.
+"""Retrieval-augmented generation: query -> relevant chunks -> answer.
 
-Given a user question, fetches the most relevant document chunks (via
-embeddings/ + a vector search) for the requesting client only, and
-assembles them into the context passed to llm/. This is the layer
-responsible for keeping one client's documents from ever leaking into
-another client's answers. Added when RAG is implemented.
+search.py runs the client-scoped pgvector similarity query, prompt.py
+builds what actually gets sent to Claude, and pipeline.py wires those
+together with the embedding step (app/embeddings) and the LLM call
+(app/llm) into the single function api/chat.py calls.
 """

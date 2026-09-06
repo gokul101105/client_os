@@ -1,7 +1,6 @@
-"""Wraps calls to the underlying LLM provider (Claude).
+"""Wraps calls to Claude (Anthropic's Messages API).
 
-Will hold the API client wrapper, prompt templates, and model
-configuration — the "how we talk to the model" layer that api/ routes
-call into instead of calling Anthropic's SDK directly. Added starting
-the module that implements real /ai/chat and /ai/summarize logic.
+claude_client.py is the only file that imports the Anthropic SDK — every
+other module (including app/rag) calls generate_answer() with a plain
+system prompt + user message string and never touches the SDK directly.
 """

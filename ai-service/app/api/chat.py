@@ -1,5 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
+from app.llm.claude_client import LlmError
+from app.rag.pipeline import answer_question
+from app.rag.search import RetrievalError
 from app.schemas import ChatRequest, ChatResponse
 
 router = APIRouter()
@@ -7,10 +10,15 @@ router = APIRouter()
 
 @router.post("/chat", response_model=ChatResponse)
 def send_message(request: ChatRequest) -> ChatResponse:
-    # Stub only. A later module routes this through app/llm (the Claude
-    # client) and, once app/rag exists, through client-scoped retrieved
-    # context before the model ever sees the question.
+    try:
+        result = answer_question(request.client_id, request.message)
+    except RetrievalError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except LlmError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
     return ChatResponse(
-        reply=f'[stub] Received your message for client {request.client_id}: "{request.message}"',
+        reply=result["reply"],
         conversation_id=request.conversation_id,
+        source_chunk_ids=result["source_chunk_ids"],
     )
