@@ -2,6 +2,8 @@ package com.clientos.backend.integration;
 
 import com.clientos.backend.dto.AiServiceChatRequest;
 import com.clientos.backend.dto.AiServiceChatResponse;
+import com.clientos.backend.dto.AiServiceSummarizeRequest;
+import com.clientos.backend.dto.AiServiceSummarizeResponse;
 import com.clientos.backend.exception.AiServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -59,6 +61,26 @@ public class AiServiceClient {
         } catch (RestClientResponseException e) {
             // The AI service itself returned a 4xx/5xx (e.g. its own 503
             // when Postgres or Claude is unavailable).
+            throw new AiServiceException("The AI assistant returned an error", e);
+        }
+    }
+
+    public AiServiceSummarizeResponse summarize(Long clientId, String clientName, String industry, String plan) {
+        try {
+            AiServiceSummarizeResponse response = restClient.post()
+                    .uri("/ai/summarize")
+                    .body(new AiServiceSummarizeRequest(clientId, clientName, industry, plan))
+                    .retrieve()
+                    .body(AiServiceSummarizeResponse.class);
+
+            if (response == null) {
+                throw new AiServiceException("The AI assistant returned an empty summary response");
+            }
+            return response;
+        } catch (ResourceAccessException e) {
+            throw new AiServiceException(
+                    "The AI assistant is taking too long to respond or is unreachable", e);
+        } catch (RestClientResponseException e) {
             throw new AiServiceException("The AI assistant returned an error", e);
         }
     }

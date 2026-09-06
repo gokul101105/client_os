@@ -13,3 +13,19 @@ export async function askQuestion(clientId, message) {
   );
   return data; // { reply, sourceChunkIds }
 }
+
+// Summary generation involves broader retrieval than a single chat
+// question, so it gets the same generous timeout.
+const SUMMARY_TIMEOUT_MS = 35000;
+
+export async function generateClientSummary(clientId) {
+  const { data } = await api.post(`/clients/${clientId}/ai/summary`, null, {
+    timeout: SUMMARY_TIMEOUT_MS,
+  });
+  return data;
+}
+
+export async function getLatestClientSummary(clientId) {
+  const { data } = await api.get(`/clients/${clientId}/ai/summary`);
+  return data;
+}

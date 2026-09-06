@@ -46,5 +46,10 @@ class Settings:
     rag_top_k: int = int(os.getenv("RAG_TOP_K", "5"))
     rag_max_distance: float = float(os.getenv("RAG_MAX_DISTANCE", "0.6"))
 
+    # Client summary generation (Module 13). A simple recency cap rather
+    # than smarter selection (e.g. one chunk per document) -- see
+    # app/summary/retrieval.py.
+    summary_max_chunks: int = int(os.getenv("SUMMARY_MAX_CHUNKS", "40"))
+
 
 settings = Settings()

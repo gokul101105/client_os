@@ -29,13 +29,25 @@ class ChatResponse(BaseModel):
 
 
 class SummarizeRequest(BaseModel):
+    # client_id and metadata Spring Boot already has on hand from its own
+    # Client entity -- Python never queries the clients table directly
+    # (same boundary as everything else in this service: it only ever
+    # touches document_chunks).
     client_id: int
-    document_id: int
+    client_name: str
+    industry: Optional[str] = None
+    plan: str
 
 
 class SummarizeResponse(BaseModel):
-    document_id: int
-    summary: str
+    client_id: int
+    company: Optional[str] = None
+    current_situation: str
+    major_problems: List[str]
+    recent_activity: str
+    sentiment: str
+    attention_required: bool
+    attention_reason: str
 
 
 class ProcessDocumentRequest(BaseModel):

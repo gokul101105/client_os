@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import DocumentsSection from '../components/DocumentsSection';
 import AiAssistantSection from '../components/AiAssistantSection';
+import ClientSummaryPanel from '../components/ClientSummaryPanel';
 import { getClientById } from '../services/clientService';
 
 const TABS = ['Overview', 'Documents', 'AI Assistant', 'Health'];
@@ -82,13 +83,16 @@ export default function ClientDetailsPage() {
 
             <div className="mt-6">
               {activeTab === 'Overview' && (
-                <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <Field label="Account manager" value={client.accountManagerName} />
-                  <Field label="Health score" value={client.healthScore ?? '—'} />
-                  <Field label="Open issues" value={client.openIssuesCount ?? 0} />
-                  <Field label="Last activity" value={formatDate(client.lastActivityDate)} />
-                  <Field label="Client since" value={formatDate(client.createdAt)} />
-                </dl>
+                <div className="space-y-6">
+                  <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <Field label="Account manager" value={client.accountManagerName} />
+                    <Field label="Health score" value={client.healthScore ?? '—'} />
+                    <Field label="Open issues" value={client.openIssuesCount ?? 0} />
+                    <Field label="Last activity" value={formatDate(client.lastActivityDate)} />
+                    <Field label="Client since" value={formatDate(client.createdAt)} />
+                  </dl>
+                  <ClientSummaryPanel clientId={client.id} />
+                </div>
               )}
               {activeTab === 'Documents' && <DocumentsSection clientId={client.id} />}
               {activeTab === 'AI Assistant' && <AiAssistantSection clientId={client.id} />}

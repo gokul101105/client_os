@@ -37,3 +37,40 @@ def generate_answer(system_prompt: str, user_content: str) -> str:
         raise LlmError(f"Claude API call failed: {exc}") from exc
 
     return "".join(block.text for block in response.content if block.type == "text")
+
+
+def generate_structured_output(
+    system_prompt: str,
+    user_content: str,
+    tool_name: str,
+    tool_description: str,
+    tool_schema: dict,
+) -> dict:
+    # Forces Claude to respond via a single tool call matching tool_schema,
+    # instead of asking it to format JSON in free text and hoping the
+    # formatting holds. tool_choice pins it to this exact tool -- the model
+    # can't choose to just reply with prose instead.
+    client = _get_client()
+    try:
+        response = client.messages.create(
+            model=settings.claude_model,
+            max_tokens=settings.claude_max_tokens,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_content}],
+            tools=[
+                {
+                    "name": tool_name,
+                    "description": tool_description,
+                    "input_schema": tool_schema,
+                }
+            ],
+            tool_choice={"type": "tool", "name": tool_name},
+        )
+    except APIError as exc:
+        raise LlmError(f"Claude API call failed: {exc}") from exc
+
+    for block in response.content:
+        if block.type == "tool_use" and block.name == tool_name:
+            return block.input
+
+    raise LlmError("Claude did not return the expected structured tool call")
