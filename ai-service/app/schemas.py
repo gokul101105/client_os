@@ -41,11 +41,18 @@ class ProcessDocumentRequest(BaseModel):
 
 
 class DocumentChunk(BaseModel):
+    # id is the document_chunks row id, present once the chunk has
+    # actually been stored.
+    id: Optional[int] = None
     document_id: int
     client_id: int
     chunk_index: int
     content: str
     char_count: int
+    # The vector itself (384 floats) isn't returned — nothing on the
+    # Spring Boot side needs it, and 384 floats per chunk would make the
+    # response unreadable. This just confirms an embedding was generated.
+    embedding_dimensions: Optional[int] = None
 
 
 class ProcessDocumentResponse(BaseModel):

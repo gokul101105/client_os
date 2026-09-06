@@ -1,0 +1,19 @@
+# Local Postgres for ClientOS, with pgvector compiled in (Module 10 needs
+# the `vector` extension — the stock postgres image doesn't ship it).
+# Matches backend/src/main/resources/application.properties exactly:
+# db "clientos", user/password "postgres", port 5432.
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: clientos-postgres
+    environment:
+      POSTGRES_DB: clientos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - clientos_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  clientos_postgres_data:

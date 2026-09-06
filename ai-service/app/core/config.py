@@ -21,5 +21,16 @@ class Settings:
     chunk_size: int = int(os.getenv("CHUNK_SIZE", "1000"))
     chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "200"))
 
+    # Postgres/pgvector connection — same database Spring Boot uses
+    # (see docker/docker-compose.yml and backend/application.properties).
+    database_url: str = os.getenv(
+        "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/clientos"
+    )
+
+    # Local embedding model (via fastembed). Must produce vectors matching
+    # the vector(384) column in document_chunks — see
+    # app/embeddings/generator.py and database/migrations/V3__document_embeddings.sql.
+    embedding_model_name: str = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+
 
 settings = Settings()
