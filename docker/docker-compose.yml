@@ -1,19 +1,87 @@
-# Local Postgres for ClientOS, with pgvector compiled in (Module 10 needs
-# the `vector` extension — the stock postgres image doesn't ship it).
-# Matches backend/src/main/resources/application.properties exactly:
-# db "clientos", user/password "postgres", port 5432.
+# Module 18: the full ClientOS stack in one file -- supersedes the
+# postgres-only version from Module 10 (this same file), which was
+# always meant as a stopgap just to get pgvector running.
+#
+# Run from the repo root:
+#   docker compose -f docker/docker-compose.yml up --build
+#
+# Required secrets (JWT_SECRET, INTERNAL_API_KEY, ANTHROPIC_API_KEY) are
+# NOT given defaults here on purpose -- see .env.example at the repo
+# root. Copy it to .env (same directory as this file, or the repo root --
+# docker compose reads .env next to wherever you invoke it from) and
+# fill in real values before starting.
 services:
   postgres:
     image: pgvector/pgvector:pg16
     container_name: clientos-postgres
     environment:
-      POSTGRES_DB: clientos
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-clientos}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
       - clientos_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    container_name: clientos-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-clientos}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_FLYWAY_LOCATIONS: filesystem:/database/migrations
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env -- see .env.example}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-3600000}
+      AI_SERVICE_BASE_URL: http://ai-service:8000
+      AI_SERVICE_INTERNAL_API_KEY: ${INTERNAL_API_KEY:?Set INTERNAL_API_KEY in .env -- see .env.example}
+      APP_STORAGE_BASE_DIR: /app/storage/documents
+    ports:
+      - "8080:8080"
+    volumes:
+      - clientos_documents:/app/storage/documents
+
+  ai-service:
+    build:
+      context: ../ai-service
+      dockerfile: Dockerfile
+    container_name: clientos-ai-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?Set INTERNAL_API_KEY in .env -- see .env.example}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-clientos}
+      DOCUMENT_STORAGE_DIR: /app/storage/documents
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?Set ANTHROPIC_API_KEY in .env -- see .env.example}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-sonnet-5}
+    ports:
+      - "8000:8000"
+    volumes:
+      - clientos_documents:/app/storage/documents
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080/api}
+    container_name: clientos-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
 
 volumes:
   clientos_postgres_data:
+  clientos_documents:

@@ -48,6 +48,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody(ex.getMessage()));
     }
 
+    @ExceptionHandler(ClientHealthNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(ClientHealthNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody(ex.getMessage()));
+    }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(ex.getMessage()));

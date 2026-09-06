@@ -77,3 +77,61 @@ class ProcessDocumentResponse(BaseModel):
     status: str
     chunk_count: int
     chunks: List[DocumentChunk]
+
+
+class RecommendRequest(BaseModel):
+    # Everything here is data Spring Boot already owns and fetched before
+    # this call -- Python never queries clients/client_health/
+    # client_summaries directly (same boundary held since Module 13).
+    client_id: int
+    client_name: str
+    industry: Optional[str] = None
+    plan: str
+    health_score: Optional[int] = None
+    health_band: Optional[str] = None
+    health_breakdown_reasons: List[str] = []
+    current_situation: Optional[str] = None
+    major_problems: List[str] = []
+    sentiment: Optional[str] = None
+    attention_required: Optional[bool] = None
+    attention_reason: Optional[str] = None
+
+
+class Recommendation(BaseModel):
+    action: str
+    reason: str
+    priority: str
+
+
+class RecommendResponse(BaseModel):
+    client_id: int
+    recommendations: List[Recommendation]
+
+
+class MeetingBriefRequest(BaseModel):
+    client_id: int
+    client_name: str
+    industry: Optional[str] = None
+    plan: str
+    # Same honest placeholder as Modules 14/15: always 0 until a
+    # ticketing module exists.
+    open_issues_count: int = 0
+
+
+class MeetingBrief(BaseModel):
+    agenda_suggestions: List[str]
+    key_context: str
+    open_issues_to_address: List[str]
+    risks_or_watchouts: List[str]
+
+
+class MeetingBriefSources(BaseModel):
+    documents_reviewed: int
+    issues_data_available: bool
+    meetings_data_available: bool
+
+
+class MeetingBriefResponse(BaseModel):
+    client_id: int
+    brief: MeetingBrief
+    sources_used: MeetingBriefSources

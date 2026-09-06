@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.api import chat, documents, summarize
+from app.api import agent, chat, documents, recommend, summarize
 from app.core.security import verify_internal_api_key
 
 # Every /ai/* route requires the shared internal API key. /health (mounted
@@ -10,3 +10,5 @@ api_router = APIRouter(prefix="/ai", dependencies=[Depends(verify_internal_api_k
 api_router.include_router(chat.router)
 api_router.include_router(summarize.router)
 api_router.include_router(documents.router)
+api_router.include_router(recommend.router)
+api_router.include_router(agent.router)

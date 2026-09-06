@@ -2,9 +2,15 @@ package com.clientos.backend.integration;
 
 import com.clientos.backend.dto.AiServiceChatRequest;
 import com.clientos.backend.dto.AiServiceChatResponse;
+import com.clientos.backend.dto.AiServiceMeetingBriefRequest;
+import com.clientos.backend.dto.AiServiceMeetingBriefResponse;
+import com.clientos.backend.dto.AiServiceRecommendRequest;
+import com.clientos.backend.dto.AiServiceRecommendResponse;
 import com.clientos.backend.dto.AiServiceSummarizeRequest;
 import com.clientos.backend.dto.AiServiceSummarizeResponse;
 import com.clientos.backend.exception.AiServiceException;
+
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
@@ -75,6 +81,66 @@ public class AiServiceClient {
 
             if (response == null) {
                 throw new AiServiceException("The AI assistant returned an empty summary response");
+            }
+            return response;
+        } catch (ResourceAccessException e) {
+            throw new AiServiceException(
+                    "The AI assistant is taking too long to respond or is unreachable", e);
+        } catch (RestClientResponseException e) {
+            throw new AiServiceException("The AI assistant returned an error", e);
+        }
+    }
+
+    public AiServiceRecommendResponse recommend(
+            Long clientId,
+            String clientName,
+            String industry,
+            String plan,
+            Integer healthScore,
+            String healthBand,
+            List<String> healthBreakdownReasons,
+            String currentSituation,
+            List<String> majorProblems,
+            String sentiment,
+            Boolean attentionRequired,
+            String attentionReason
+    ) {
+        try {
+            AiServiceRecommendResponse response = restClient.post()
+                    .uri("/ai/recommend")
+                    .body(new AiServiceRecommendRequest(
+                            clientId, clientName, industry, plan,
+                            healthScore, healthBand, healthBreakdownReasons,
+                            currentSituation, majorProblems, sentiment,
+                            attentionRequired, attentionReason
+                    ))
+                    .retrieve()
+                    .body(AiServiceRecommendResponse.class);
+
+            if (response == null) {
+                throw new AiServiceException("The AI assistant returned an empty recommendations response");
+            }
+            return response;
+        } catch (ResourceAccessException e) {
+            throw new AiServiceException(
+                    "The AI assistant is taking too long to respond or is unreachable", e);
+        } catch (RestClientResponseException e) {
+            throw new AiServiceException("The AI assistant returned an error", e);
+        }
+    }
+
+    public AiServiceMeetingBriefResponse meetingBrief(
+            Long clientId, String clientName, String industry, String plan, Integer openIssuesCount
+    ) {
+        try {
+            AiServiceMeetingBriefResponse response = restClient.post()
+                    .uri("/ai/agent/meeting-brief")
+                    .body(new AiServiceMeetingBriefRequest(clientId, clientName, industry, plan, openIssuesCount))
+                    .retrieve()
+                    .body(AiServiceMeetingBriefResponse.class);
+
+            if (response == null) {
+                throw new AiServiceException("The AI assistant returned an empty meeting brief response");
             }
             return response;
         } catch (ResourceAccessException e) {

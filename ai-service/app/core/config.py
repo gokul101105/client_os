@@ -51,5 +51,14 @@ class Settings:
     # app/summary/retrieval.py.
     summary_max_chunks: int = int(os.getenv("SUMMARY_MAX_CHUNKS", "40"))
 
+    # Recommendations (Module 15). Independently tunable from rag_top_k --
+    # supporting evidence for recommendations may want a different count
+    # than chat answers.
+    recommend_top_k: int = int(os.getenv("RECOMMEND_TOP_K", "5"))
+
+    # Meeting-brief agent (Module 16). Reuses the same recency-cap
+    # strategy as summary_max_chunks (see app/agents/tools.py).
+    agent_max_chunks: int = int(os.getenv("AGENT_MAX_CHUNKS", "40"))
+
 
 settings = Settings()

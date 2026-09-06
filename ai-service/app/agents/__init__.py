@@ -1,6 +1,10 @@
-"""Multi-step, tool-using LLM workflows beyond single-turn chat/summarize.
+"""Fixed-sequence, multi-step orchestration (Module 16).
 
-For questions that need more than one retrieval/reasoning step (e.g.
-comparing multiple documents, taking an action based on an answer).
-Added in a later module, well after basic RAG exists.
+The one place in this service that gathers from more than one source
+before a single Claude call. tools.py holds the three data-gathering
+functions (search_documents, get_issues, get_meetings), prompt.py builds
+the synthesis prompt, pipeline.py calls the tools in a fixed order --
+decided by this Python code, not by Claude -- then synthesizes one final
+result. Not an autonomous planning loop: see the Module 16 write-up for
+why a fixed sequence is the right scope for this MVP.
 """

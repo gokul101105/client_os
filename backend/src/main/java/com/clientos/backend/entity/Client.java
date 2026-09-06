@@ -96,6 +96,10 @@ public class Client {
         return healthScore;
     }
 
+    public void setHealthScore(Integer healthScore) {
+        this.healthScore = healthScore;
+    }
+
     public Integer getOpenIssuesCount() {
         return openIssuesCount;
     }

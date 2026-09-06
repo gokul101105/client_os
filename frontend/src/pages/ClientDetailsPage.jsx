@@ -4,6 +4,9 @@ import Navbar from '../components/Navbar';
 import DocumentsSection from '../components/DocumentsSection';
 import AiAssistantSection from '../components/AiAssistantSection';
 import ClientSummaryPanel from '../components/ClientSummaryPanel';
+import ClientHealthPanel from '../components/ClientHealthPanel';
+import RecommendationsPanel from '../components/RecommendationsPanel';
+import MeetingBriefPanel from '../components/MeetingBriefPanel';
 import { getClientById } from '../services/clientService';
 
 const TABS = ['Overview', 'Documents', 'AI Assistant', 'Health'];
@@ -57,9 +60,16 @@ export default function ClientDetailsPage() {
                 <h1 className="text-2xl font-semibold text-gray-900">{client.name}</h1>
                 <p className="mt-1 text-sm text-gray-500">{client.industry || 'No industry set'}</p>
               </div>
-              <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-                {client.plan}
-              </span>
+              <div className="flex shrink-0 items-center gap-2">
+                {client.healthScore != null && (
+                  <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+                    Health: {client.healthScore} {client.healthEmoji}
+                  </span>
+                )}
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+                  {client.plan}
+                </span>
+              </div>
             </div>
 
             <div className="mt-6 border-b border-gray-200">
@@ -95,8 +105,14 @@ export default function ClientDetailsPage() {
                 </div>
               )}
               {activeTab === 'Documents' && <DocumentsSection clientId={client.id} />}
-              {activeTab === 'AI Assistant' && <AiAssistantSection clientId={client.id} />}
-              {activeTab === 'Health' && <Placeholder text="Detailed health analytics are coming in a later module." />}
+              {activeTab === 'AI Assistant' && (
+                <div className="space-y-6">
+                  <RecommendationsPanel clientId={client.id} />
+                  <MeetingBriefPanel clientId={client.id} />
+                  <AiAssistantSection clientId={client.id} />
+                </div>
+              )}
+              {activeTab === 'Health' && <ClientHealthPanel clientId={client.id} />}
             </div>
           </>
         )}
@@ -110,14 +126,6 @@ function Field({ label, value }) {
     <div className="rounded-lg border border-gray-200 bg-white p-4">
       <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</dt>
       <dd className="mt-1 text-sm text-gray-900">{value}</dd>
-    </div>
-  );
-}
-
-function Placeholder({ text }) {
-  return (
-    <div className="rounded-lg border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
-      {text}
     </div>
   );
 }
