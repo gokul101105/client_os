@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import DocumentsSection from '../components/DocumentsSection';
+import AiAssistantSection from '../components/AiAssistantSection';
 import { getClientById } from '../services/clientService';
 
 const TABS = ['Overview', 'Documents', 'AI Assistant', 'Health'];
@@ -90,7 +91,7 @@ export default function ClientDetailsPage() {
                 </dl>
               )}
               {activeTab === 'Documents' && <DocumentsSection clientId={client.id} />}
-              {activeTab === 'AI Assistant' && <Placeholder text="AI Assistant is not wired up yet." />}
+              {activeTab === 'AI Assistant' && <AiAssistantSection clientId={client.id} />}
               {activeTab === 'Health' && <Placeholder text="Detailed health analytics are coming in a later module." />}
             </div>
           </>
