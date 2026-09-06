@@ -1,6 +1,8 @@
-"""Document ingestion pipeline: parsing, chunking, preparing for embedding.
+"""Document ingestion pipeline: extraction, cleaning, and chunking.
 
-Will hold the PDF/TXT/DOCX text-extraction logic and the chunking
-strategy that /ai/process-document calls into. Added in a later module —
-today that endpoint is a stub.
+extractors.py pulls raw text out of PDF/TXT/DOCX files, cleaning.py
+normalizes it, chunking.py splits it into overlapping pieces, and
+pipeline.py wires those three together. Embedding those chunks and
+storing them in the document_chunks table is Module 10's job — this
+package stops at producing chunk dicts in memory.
 """

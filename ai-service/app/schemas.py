@@ -5,7 +5,7 @@ one place that defines the exact JSON shape Spring Boot and this service
 agree on, independent of whatever internal logic eventually produces it.
 """
 
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -40,6 +40,17 @@ class ProcessDocumentRequest(BaseModel):
     file_path: str
 
 
+class DocumentChunk(BaseModel):
+    document_id: int
+    client_id: int
+    chunk_index: int
+    content: str
+    char_count: int
+
+
 class ProcessDocumentResponse(BaseModel):
     document_id: int
+    client_id: int
     status: str
+    chunk_count: int
+    chunks: List[DocumentChunk]
