@@ -62,7 +62,7 @@ public class ClientSummaryService {
 
     public ClientSummaryResponse getLatest(Long clientId, String email) {
         Client client = clientService.findByIdForCurrentUser(clientId, email);
-        ClientSummary summary = clientSummaryRepository.findFirstByClientIdOrderByGeneratedAtDesc(client.getId())
+        ClientSummary summary = clientSummaryRepository.findLatestByClientId(client.getId())
                 .orElseThrow(() -> new ClientSummaryNotFoundException(clientId));
         return ClientSummaryResponse.from(summary);
     }

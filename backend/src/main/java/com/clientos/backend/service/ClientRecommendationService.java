@@ -44,7 +44,7 @@ public class ClientRecommendationService {
         Optional<ClientHealth> health =
                 clientHealthRepository.findFirstByClientIdOrderByComputedAtDesc(client.getId());
         Optional<ClientSummary> summary =
-                clientSummaryRepository.findFirstByClientIdOrderByGeneratedAtDesc(client.getId());
+                clientSummaryRepository.findLatestByClientId(client.getId());
 
         List<String> breakdownReasons = health
                 .map(h -> h.getBreakdown().stream()

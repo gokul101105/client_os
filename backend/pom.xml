@@ -35,6 +35,18 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
+		<!-- Module 12/18: AiServiceClient's RestClient.Builder needs
+		     RestClientAutoConfiguration, which lives in its own module in
+		     this Spring Boot version rather than being pulled in
+		     transitively by spring-boot-starter-webmvc. This bug was
+		     latent since Module 12: the app never got far enough through
+		     startup to hit it until Flyway's pgvector migration (Module 10)
+		     finally succeeded. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-restclient</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>

@@ -2,8 +2,11 @@ package com.clientos.backend.service;
 
 import com.clientos.backend.entity.Client;
 import com.clientos.backend.entity.Document;
+import com.clientos.backend.entity.Role;
 import com.clientos.backend.entity.User;
+import com.clientos.backend.exception.AiServiceException;
 import com.clientos.backend.exception.InvalidDocumentException;
+import com.clientos.backend.integration.AiServiceClient;
 import com.clientos.backend.repository.DocumentRepository;
 import com.clientos.backend.repository.UserRepository;
 import com.clientos.backend.storage.FileStorageService;
@@ -20,7 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -42,14 +48,18 @@ class DocumentServiceTest {
     @Mock
     private FileStorageService fileStorageService;
 
+    @Mock
+    private AiServiceClient aiServiceClient;
+
     private DocumentService documentService;
 
-    private final User uploader = new User("Employee A", "a@test.com", "hash", "EMPLOYEE");
+    private final User uploader = new User("Employee A", "a@test.com", "hash", Role.ACCOUNT_MANAGER);
     private Client client;
 
     @BeforeEach
     void setUp() {
-        documentService = new DocumentService(documentRepository, clientService, userRepository, fileStorageService);
+        documentService =
+                new DocumentService(documentRepository, clientService, userRepository, fileStorageService, aiServiceClient);
         client = new Client("Acme Corp", uploader, "Retail", "Pro");
         lenient().when(clientService.findByIdForCurrentUser(1L, "a@test.com")).thenReturn(client);
         lenient().when(userRepository.findByEmail("a@test.com")).thenReturn(Optional.of(uploader));
@@ -101,6 +111,24 @@ class DocumentServiceTest {
 
         assertThat(result.getFileType()).isEqualTo("PDF");
         assertThat(result.getFileName()).isEqualTo("notes.pdf");
+    }
+
+    @Test
+    void processForAiDeletesTheDocumentWhenProcessingFails() {
+        Document document = new Document(client, "notes.pdf", "PDF", "1/generated-name.pdf", uploader);
+        when(documentRepository.findByIdAndClientId(nullable(Long.class), nullable(Long.class)))
+                .thenReturn(Optional.of(document));
+        doThrow(new AiServiceException("unreachable"))
+                .when(aiServiceClient).processDocument(nullable(Long.class), nullable(Long.class), anyString());
+
+        assertThatThrownBy(() -> documentService.processForAi(1L, 1L, "a@test.com"))
+                .isInstanceOf(AiServiceException.class);
+
+        // An unprocessable document is useless to every AI feature, so the
+        // failed upload is undone entirely rather than left behind inert --
+        // see the comment in DocumentService.processForAi().
+        verify(fileStorageService).delete("1/generated-name.pdf");
+        verify(documentRepository).delete(document);
     }
 
     @Test

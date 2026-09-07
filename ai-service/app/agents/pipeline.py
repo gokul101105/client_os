@@ -2,7 +2,7 @@
 
 The sequence below -- documents, then issues, then meetings, then one
 synthesis call -- is always the same, always in this order, decided here
-by plain Python, not by Claude choosing what to call. See the Module 16
+by plain Python, not by Gemini choosing what to call. See the Module 16
 write-up for why that's the appropriate scope for this MVP rather than
 an autonomous planning loop.
 """
@@ -10,7 +10,7 @@ an autonomous planning loop.
 from app.agents.prompt import SYSTEM_PROMPT, build_user_content
 from app.agents.tools import get_issues, get_meetings, search_documents
 from app.core.config import settings
-from app.llm.claude_client import generate_structured_output
+from app.llm.gemini_client import generate_structured_output
 
 TOOL_NAME = "record_meeting_brief"
 

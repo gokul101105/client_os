@@ -2,7 +2,7 @@
 
 By the time this runs, every tool has already been called (see
 pipeline.py) -- this only formats their results into one prompt for a
-single, final Claude call. Claude never sees the tools individually or
+single, final Gemini call. Gemini never sees the tools individually or
 decides to call them; it only sees their already-gathered output.
 """
 

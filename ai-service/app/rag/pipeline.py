@@ -1,13 +1,13 @@
 """Orchestrates the full RAG flow: question -> embed -> retrieve -> answer.
 
 This is the only function api/chat.py calls into. Both "no relevant
-context" cases are handled here, before Claude is ever called — neither
+context" cases are handled here, before Gemini is ever called — neither
 is an error, both are legitimate answers that don't require the LLM.
 """
 
 from app.core.config import settings
 from app.embeddings.generator import generate_embeddings
-from app.llm.claude_client import generate_answer
+from app.llm.gemini_client import generate_answer
 from app.rag.prompt import SYSTEM_PROMPT, build_user_content
 from app.rag.search import find_relevant_chunks
 

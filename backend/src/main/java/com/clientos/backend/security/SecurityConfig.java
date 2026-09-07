@@ -3,6 +3,7 @@ package com.clientos.backend.security;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -54,7 +55,22 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Any error not caught by GlobalExceptionHandler (404, 405,
+                        // and this app's first-ever 403 -- introduced by the
+                        // hasRole() rules below) gets internally forwarded by Spring
+                        // Boot to /error to render it. That forward re-enters this
+                        // same filter chain as a fresh dispatch; without this rule
+                        // it falls through to anyRequest().authenticated(), finds no
+                        // authentication on the forwarded request, and the original
+                        // status gets clobbered with 401 by the entry point below.
+                        // Permitting /error lets the original status pass through
+                        // untouched instead.
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/clients/requests").hasRole("ACCOUNT_MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/clients/*/delete-requests").hasRole("ACCOUNT_MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/clients/requests/mine").hasRole("ACCOUNT_MANAGER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(

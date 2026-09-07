@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem(TOKEN_KEY, token);
     const claims = decodeJwt(token);
     setUser({ token, email: claims?.sub ?? null, role: claims?.role ?? null });
+    return { token, role: claims?.role ?? null };
   };
 
   const logout = () => {

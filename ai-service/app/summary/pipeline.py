@@ -1,9 +1,9 @@
-"""Orchestrates client summary generation: fetch chunks -> prompt -> Claude
+"""Orchestrates client summary generation: fetch chunks -> prompt -> Gemini
 -> structured dict. The only function api/summarize.py calls into.
 """
 
 from app.core.config import settings
-from app.llm.claude_client import generate_structured_output
+from app.llm.gemini_client import generate_structured_output
 from app.summary.prompt import SYSTEM_PROMPT, build_user_content
 from app.summary.retrieval import fetch_chunks_for_summary
 
@@ -45,7 +45,7 @@ TOOL_SCHEMA = {
     ],
 }
 
-# Returned without ever calling Claude when a client has no processed
+# Returned without ever calling Gemini when a client has no processed
 # documents yet -- there's nothing to summarize, and an LLM asked to
 # summarize "(no documents available)" would either refuse unhelpfully or
 # invent content neither behavior is useful here.

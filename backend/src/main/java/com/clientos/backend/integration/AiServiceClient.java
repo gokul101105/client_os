@@ -4,6 +4,7 @@ import com.clientos.backend.dto.AiServiceChatRequest;
 import com.clientos.backend.dto.AiServiceChatResponse;
 import com.clientos.backend.dto.AiServiceMeetingBriefRequest;
 import com.clientos.backend.dto.AiServiceMeetingBriefResponse;
+import com.clientos.backend.dto.AiServiceProcessDocumentRequest;
 import com.clientos.backend.dto.AiServiceRecommendRequest;
 import com.clientos.backend.dto.AiServiceRecommendResponse;
 import com.clientos.backend.dto.AiServiceSummarizeRequest;
@@ -16,6 +17,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 // The only class in this codebase that knows the AI service is a separate
@@ -68,6 +70,35 @@ public class AiServiceClient {
             // The AI service itself returned a 4xx/5xx (e.g. its own 503
             // when Postgres or Claude is unavailable).
             throw new AiServiceException("The AI assistant returned an error", e);
+        } catch (RestClientException e) {
+            // Neither of the above -- e.g. a timeout that happens mid-way
+            // through reading/converting the response body (as opposed to
+            // the connect-phase timeout ResourceAccessException covers)
+            // throws the bare parent type instead. Caught live as an
+            // unhandled 500 before this catch existed.
+            throw new AiServiceException("The AI assistant returned an error", e);
+        }
+    }
+
+    // Called right after a document is stored, so it's immediately
+    // searchable -- chunking + local embedding of one small document is
+    // fast, so this stays synchronous like every other AI service call
+    // here rather than introducing a second (async/background) pattern
+    // for just this one case.
+    public void processDocument(Long clientId, Long documentId, String filePath) {
+        try {
+            restClient.post()
+                    .uri("/ai/process-document")
+                    .body(new AiServiceProcessDocumentRequest(clientId, documentId, filePath))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (ResourceAccessException e) {
+            throw new AiServiceException(
+                    "The AI assistant is taking too long to respond or is unreachable", e);
+        } catch (RestClientResponseException e) {
+            throw new AiServiceException("Could not process this document for AI features", e);
+        } catch (RestClientException e) {
+            throw new AiServiceException("Could not process this document for AI features", e);
         }
     }
 
@@ -87,6 +118,8 @@ public class AiServiceClient {
             throw new AiServiceException(
                     "The AI assistant is taking too long to respond or is unreachable", e);
         } catch (RestClientResponseException e) {
+            throw new AiServiceException("The AI assistant returned an error", e);
+        } catch (RestClientException e) {
             throw new AiServiceException("The AI assistant returned an error", e);
         }
     }
@@ -126,6 +159,8 @@ public class AiServiceClient {
                     "The AI assistant is taking too long to respond or is unreachable", e);
         } catch (RestClientResponseException e) {
             throw new AiServiceException("The AI assistant returned an error", e);
+        } catch (RestClientException e) {
+            throw new AiServiceException("The AI assistant returned an error", e);
         }
     }
 
@@ -147,6 +182,8 @@ public class AiServiceClient {
             throw new AiServiceException(
                     "The AI assistant is taking too long to respond or is unreachable", e);
         } catch (RestClientResponseException e) {
+            throw new AiServiceException("The AI assistant returned an error", e);
+        } catch (RestClientException e) {
             throw new AiServiceException("The AI assistant returned an error", e);
         }
     }

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.llm.claude_client import LlmError
+from app.llm.gemini_client import LlmError
 from app.rag.pipeline import answer_question
 from app.rag.search import RetrievalError
 from app.schemas import ChatRequest, ChatResponse

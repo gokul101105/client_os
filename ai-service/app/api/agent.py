@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.agents.pipeline import prepare_meeting_brief
-from app.llm.claude_client import LlmError
+from app.llm.gemini_client import LlmError
 from app.schemas import MeetingBriefRequest, MeetingBriefResponse
 from app.summary.retrieval import SummaryRetrievalError
 

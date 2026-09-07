@@ -58,6 +58,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(ex.getMessage()));
     }
 
+    @ExceptionHandler(ClientRequestNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(ClientRequestNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidRequestStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidRequestState(InvalidRequestStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(ex.getMessage()));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody(ex.getMessage()));
+    }
+
+    @ExceptionHandler(SelfDeletionNotAllowedException.class)
+    public ResponseEntity<Map<String, Object>> handleSelfDeletion(SelfDeletionNotAllowedException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody(ex.getMessage()));
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuthenticationFailure(AuthenticationException ex) {
         // Deliberately generic: never reveal whether the email exists or the

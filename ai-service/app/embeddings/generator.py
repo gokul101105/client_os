@@ -3,7 +3,9 @@
 Runs fully offline via fastembed (ONNX Runtime under the hood) — no API
 key, no per-call cost, no network dependency once the model has been
 downloaded once. See the Module 10 write-up for why this was chosen over
-a hosted embeddings API (Claude itself has no embeddings endpoint).
+a hosted embeddings API — independent of whichever LLM provider handles
+chat/summary/recommendations (originally Claude, now Gemini); embeddings
+were always a separate, local decision.
 """
 
 from functools import lru_cache

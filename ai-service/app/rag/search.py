@@ -8,6 +8,7 @@ against them, not filtered out of a result set that briefly held them.
 """
 
 import psycopg
+from pgvector import Vector
 
 from app.embeddings.db import get_connection
 
@@ -38,7 +39,13 @@ def find_relevant_chunks(client_id: int, query_embedding: list[float], top_k: in
                     _SEARCH_SQL,
                     {
                         "client_id": client_id,
-                        "query_embedding": query_embedding,
+                        # register_vector only registers a dumper for
+                        # pgvector.Vector (and numpy.ndarray) -- a plain
+                        # Python list falls back to psycopg's default
+                        # array adaptation (double precision[]), which
+                        # <=> doesn't have an operator for. Wrapping it
+                        # is what actually makes it a `vector` parameter.
+                        "query_embedding": Vector(query_embedding),
                         "top_k": top_k,
                     },
                 )

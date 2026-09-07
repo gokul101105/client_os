@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.llm.claude_client import LlmError
+from app.llm.gemini_client import LlmError
 from app.schemas import SummarizeRequest, SummarizeResponse
 from app.summary.pipeline import generate_client_summary
 from app.summary.retrieval import SummaryRetrievalError

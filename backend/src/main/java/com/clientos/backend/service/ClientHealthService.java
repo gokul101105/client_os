@@ -49,7 +49,7 @@ public class ClientHealthService {
 
         LocalDateTime lastActivity = documentRepository.findMaxUploadedAtByClientId(client.getId());
         Optional<ClientSummary> latestSummary =
-                clientSummaryRepository.findFirstByClientIdOrderByGeneratedAtDesc(client.getId());
+                clientSummaryRepository.findLatestByClientId(client.getId());
 
         HealthScoreResult result = calculator.calculate(
                 client.getOpenIssuesCount(),

@@ -1,6 +1,6 @@
-"""Builds the exact prompt sent to Claude from a question + retrieved chunks.
+"""Builds the exact prompt sent to Gemini from a question + retrieved chunks.
 
-The system prompt is where the trust boundary is drawn: it tells Claude
+The system prompt is where the trust boundary is drawn: it tells Gemini
 the retrieved context is untrusted reference material to read, never
 instructions to obey. That's the mitigation for prompt injection via a
 malicious document — it does not, and cannot, substitute for the SQL-level

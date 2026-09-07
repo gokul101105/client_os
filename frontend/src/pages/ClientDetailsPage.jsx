@@ -7,6 +7,7 @@ import ClientSummaryPanel from '../components/ClientSummaryPanel';
 import ClientHealthPanel from '../components/ClientHealthPanel';
 import RecommendationsPanel from '../components/RecommendationsPanel';
 import MeetingBriefPanel from '../components/MeetingBriefPanel';
+import RequestDeleteModal from '../components/RequestDeleteModal';
 import { getClientById } from '../services/clientService';
 
 const TABS = ['Overview', 'Documents', 'AI Assistant', 'Health'];
@@ -22,6 +23,8 @@ export default function ClientDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('Overview');
+  const [showDeleteRequest, setShowDeleteRequest] = useState(false);
+  const [deleteRequested, setDeleteRequested] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,8 +72,23 @@ export default function ClientDetailsPage() {
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
                   {client.plan}
                 </span>
+                {!deleteRequested && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteRequest(true)}
+                    className="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
+                  >
+                    Request deletion
+                  </button>
+                )}
               </div>
             </div>
+
+            {deleteRequested && (
+              <p className="mt-4 rounded-md bg-blue-50 px-4 py-2 text-sm text-blue-700">
+                Deletion requested — pending admin approval.
+              </p>
+            )}
 
             <div className="mt-6 border-b border-gray-200">
               <nav className="-mb-px flex gap-6">
@@ -117,6 +135,18 @@ export default function ClientDetailsPage() {
           </>
         )}
       </main>
+
+      {showDeleteRequest && client && (
+        <RequestDeleteModal
+          clientId={client.id}
+          clientName={client.name}
+          onClose={() => setShowDeleteRequest(false)}
+          onSubmitted={() => {
+            setShowDeleteRequest(false);
+            setDeleteRequested(true);
+          }}
+        />
+      )}
     </div>
   );
 }

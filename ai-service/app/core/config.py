@@ -32,12 +32,23 @@ class Settings:
     # app/embeddings/generator.py and database/migrations/V3__document_embeddings.sql.
     embedding_model_name: str = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
 
-    # Claude (Module 11 RAG). Empty by default — app/llm/claude_client.py
-    # raises a clear error at call time rather than at import time, so the
-    # service still starts fine without a key configured yet.
-    anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "")
-    claude_model: str = os.getenv("CLAUDE_MODEL", "claude-sonnet-5")
-    claude_max_tokens: int = int(os.getenv("CLAUDE_MAX_TOKENS", "500"))
+    # Gemini (Module 11 RAG; originally built against Claude, swapped
+    # later -- see app/llm/gemini_client.py). Empty by default -- the
+    # client raises a clear error at call time rather than at import
+    # time, so the service still starts fine without a key configured.
+    gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
+    gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+    # 500 was fine for a short chat reply but too small for structured
+    # output (recommendations/summary/meeting-brief return several
+    # fields, some of them arrays) -- too low a limit truncates Gemini's
+    # JSON mid-string, which fails to parse. Raised to 2048 for that reason,
+    # then hit the same failure again on meeting-brief for a content-rich
+    # client (it aggregates the most context of any feature -- health,
+    # summary, and document chunks together -- so its output is the
+    # largest). One shared limit across summarize/recommend/meeting-brief
+    # by design; raised again rather than splitting a separate, higher
+    # budget just for the agent.
+    gemini_max_tokens: int = int(os.getenv("GEMINI_MAX_TOKENS", "4096"))
 
     # Retrieval tuning (Module 11). rag_max_distance is a starting
     # heuristic, not a derived constant — cosine-distance cutoffs for

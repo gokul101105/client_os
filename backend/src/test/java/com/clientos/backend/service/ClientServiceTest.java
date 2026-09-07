@@ -1,6 +1,7 @@
 package com.clientos.backend.service;
 
 import com.clientos.backend.entity.Client;
+import com.clientos.backend.entity.Role;
 import com.clientos.backend.entity.User;
 import com.clientos.backend.exception.ClientNotFoundException;
 import com.clientos.backend.repository.ClientRepository;
@@ -19,8 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 // Module 17: proves the actual authorization decision -- not just an
@@ -39,7 +38,7 @@ class ClientServiceTest {
     @InjectMocks
     private ClientService clientService;
 
-    private final User employeeA = new User("Employee A", "a@test.com", "hash", "EMPLOYEE");
+    private final User employeeA = new User("Employee A", "a@test.com", "hash", Role.ACCOUNT_MANAGER);
 
     @BeforeEach
     void setUp() {
@@ -66,15 +65,5 @@ class ClientServiceTest {
         Client result = clientService.findByIdForCurrentUser(5L, "a@test.com");
 
         assertThat(result).isSameAs(ownClient);
-    }
-
-    @Test
-    void deletingAnotherEmployeesClientIsRejectedBeforeAnyDeleteHappens() {
-        when(clientRepository.findByIdAndOwnerId(eq(99L), any())).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> clientService.delete(99L, "a@test.com"))
-                .isInstanceOf(ClientNotFoundException.class);
-
-        verify(clientRepository, never()).delete(any());
     }
 }

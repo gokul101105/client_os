@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.llm.claude_client import LlmError
+from app.llm.gemini_client import LlmError
 from app.rag.search import RetrievalError
 from app.recommend.pipeline import generate_recommendations
 from app.schemas import Recommendation, RecommendRequest, RecommendResponse

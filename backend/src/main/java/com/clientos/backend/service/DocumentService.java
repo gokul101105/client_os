@@ -5,6 +5,7 @@ import com.clientos.backend.entity.Document;
 import com.clientos.backend.entity.User;
 import com.clientos.backend.exception.DocumentNotFoundException;
 import com.clientos.backend.exception.InvalidDocumentException;
+import com.clientos.backend.integration.AiServiceClient;
 import com.clientos.backend.repository.DocumentRepository;
 import com.clientos.backend.repository.UserRepository;
 import com.clientos.backend.storage.FileStorageService;
@@ -35,17 +36,20 @@ public class DocumentService {
     private final ClientService clientService;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final AiServiceClient aiServiceClient;
 
     public DocumentService(
             DocumentRepository documentRepository,
             ClientService clientService,
             UserRepository userRepository,
-            FileStorageService fileStorageService
+            FileStorageService fileStorageService,
+            AiServiceClient aiServiceClient
     ) {
         this.documentRepository = documentRepository;
         this.clientService = clientService;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
+        this.aiServiceClient = aiServiceClient;
     }
 
     public List<Document> listForClient(Long clientId, String email) {
@@ -79,6 +83,34 @@ public class DocumentService {
         String storedPath = fileStorageService.store(file, client.getId(), extension);
         Document document = new Document(client, originalName, fileType, storedPath, uploader);
         return documentRepository.save(document);
+    }
+
+    // Deliberately NOT called from inside upload()'s own transaction, and
+    // not @Transactional itself. The ai-service is a separate process with
+    // its own DB connection -- if it were called while upload()'s insert
+    // is still uncommitted, its own document_chunks insert would fail a
+    // foreign-key check against a document row it can't see yet (this
+    // shipped once and was caught live: "document_id=999 is not present in
+    // table documents", except with a real, just-inserted id instead of a
+    // fake one). Calling this only after upload() has already returned --
+    // see DocumentController.upload() -- guarantees the row is committed
+    // and visible first. This method's own DB access (the read here, the
+    // delete on failure) each get Spring Data's normal per-call
+    // transaction, which is all either needs.
+    public void processForAi(Long clientId, Long documentId, String email) {
+        Client client = clientService.findByIdForCurrentUser(clientId, email);
+        Document document = documentRepository.findByIdAndClientId(documentId, client.getId())
+                .orElseThrow(() -> new DocumentNotFoundException(documentId));
+
+        try {
+            aiServiceClient.processDocument(clientId, documentId, document.getFilePath());
+        } catch (RuntimeException e) {
+            // An unprocessable document is useless to every AI feature, so
+            // don't leave it behind -- undo the upload entirely rather than
+            // silently storing a permanently-inert document.
+            delete(clientId, documentId, email);
+            throw e;
+        }
     }
 
     @Transactional

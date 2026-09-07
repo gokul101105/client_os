@@ -37,30 +37,12 @@ public class ClientService {
     }
 
     @Transactional
-    public Client create(ClientRequest request, String email) {
-        User owner = resolveUser(email);
-        Client client = new Client(
-                request.name(),
-                owner,
-                request.industry(),
-                request.plan() != null ? request.plan() : DEFAULT_PLAN
-        );
-        return clientRepository.save(client);
-    }
-
-    @Transactional
     public Client update(Long id, ClientRequest request, String email) {
         Client client = findByIdForCurrentUser(id, email);
         client.setName(request.name());
         client.setIndustry(request.industry());
         client.setPlan(request.plan() != null ? request.plan() : DEFAULT_PLAN);
         return clientRepository.save(client);
-    }
-
-    @Transactional
-    public void delete(Long id, String email) {
-        Client client = findByIdForCurrentUser(id, email);
-        clientRepository.delete(client);
     }
 
     private User resolveUser(String email) {

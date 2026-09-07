@@ -9,6 +9,7 @@ theoretical one.
 """
 
 import psycopg
+from pgvector import Vector
 
 from app.embeddings.db import get_connection
 
@@ -44,7 +45,10 @@ def store_chunk_embeddings(chunks: list[dict]) -> list[int]:
                             "client_id": chunk["client_id"],
                             "chunk_index": chunk["chunk_index"],
                             "content": chunk["content"],
-                            "embedding": chunk["embedding"],
+                            # See app/rag/search.py's comment: a plain
+                            # list needs wrapping in Vector() to actually
+                            # be adapted as the `vector` column type.
+                            "embedding": Vector(chunk["embedding"]),
                         },
                     )
                     inserted_ids.append(cur.fetchone()[0])

@@ -40,7 +40,13 @@ public class DocumentController {
             @RequestParam("file") MultipartFile file,
             Authentication authentication
     ) {
-        return DocumentResponse.from(documentService.upload(clientId, file, authentication.getName()));
+        // Two separate calls on purpose -- see DocumentService.processForAi's
+        // comment. upload() must fully commit (this first call returning
+        // does that) before the ai-service is asked to look up the row it
+        // just inserted.
+        var document = documentService.upload(clientId, file, authentication.getName());
+        documentService.processForAi(clientId, document.getId(), authentication.getName());
+        return DocumentResponse.from(document);
     }
 
     @DeleteMapping("/{docId}")

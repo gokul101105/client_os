@@ -5,11 +5,15 @@
 # Run from the repo root:
 #   docker compose -f docker/docker-compose.yml up --build
 #
-# Required secrets (JWT_SECRET, INTERNAL_API_KEY, ANTHROPIC_API_KEY) are
+# Required secrets (JWT_SECRET, INTERNAL_API_KEY, GEMINI_API_KEY) are
 # NOT given defaults here on purpose -- see .env.example at the repo
 # root. Copy it to .env (same directory as this file, or the repo root --
 # docker compose reads .env next to wherever you invoke it from) and
 # fill in real values before starting.
+#
+# ai-service was originally built against Claude/Anthropic; it now
+# calls Gemini instead (see ai-service/app/llm/gemini_client.py) --
+# GEMINI_API_KEY replaces what used to be ANTHROPIC_API_KEY here.
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -63,8 +67,8 @@ services:
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:?Set INTERNAL_API_KEY in .env -- see .env.example}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-clientos}
       DOCUMENT_STORAGE_DIR: /app/storage/documents
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?Set ANTHROPIC_API_KEY in .env -- see .env.example}
-      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-sonnet-5}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?Set GEMINI_API_KEY in .env -- see .env.example}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.6-flash}
     ports:
       - "8000:8000"
     volumes:

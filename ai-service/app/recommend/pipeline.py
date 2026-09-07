@@ -1,13 +1,13 @@
 """Orchestrates recommendation generation: build a retrieval query from
 already-known problems -> reuse app/rag/search.py for supporting context
--> Claude (forced tool use) -> structured recommendations.
+-> Gemini (structured output) -> structured recommendations.
 """
 
 from typing import List, Optional
 
 from app.core.config import settings
 from app.embeddings.generator import generate_embeddings
-from app.llm.claude_client import generate_structured_output
+from app.llm.gemini_client import generate_structured_output
 from app.rag.search import find_relevant_chunks
 from app.recommend.prompt import (
     SYSTEM_PROMPT,
